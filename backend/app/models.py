@@ -15,9 +15,16 @@ class PyObjectId(ObjectId):
 
     @classmethod
     def validate(cls, v, info):
-        if not ObjectId.is_valid(v):
-            raise ValueError("Invalid ObjectId")
-        return ObjectId(v)
+        if v is None:
+            return None
+        if isinstance(v, ObjectId):
+            return str(v)
+        if isinstance(v, str):
+            if ObjectId.is_valid(v):
+                return v
+            else:
+                raise ValueError("Invalid ObjectId")
+        raise ValueError("Invalid ObjectId")
 
     @classmethod
     def __get_pydantic_json_schema__(
@@ -39,7 +46,7 @@ class Skill(BaseModel):
         }
     )
     
-    id: Optional[PyObjectId] = Field(None, alias="_id")
+    id: Optional[str] = Field(None, alias="_id")
     name: str = Field(..., min_length=1, max_length=100)
     category: Optional[str] = Field(None, max_length=50)
     level: Optional[str] = Field(None, max_length=20)
@@ -59,7 +66,7 @@ class Task(BaseModel):
         }
     )
     
-    id: Optional[PyObjectId] = Field(None, alias="_id")
+    id: Optional[str] = Field(None, alias="_id")
     title: str = Field(..., min_length=1, max_length=200)
     description: Optional[str] = Field(None, min_length=10)
     date: datetime = Field(default_factory=datetime.utcnow)
